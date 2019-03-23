@@ -1,0 +1,15 @@
+contact.dict
+digits.gram
+menu.gram
+ru-ru.dict
+ru-rus-ptm/README
+ru-rus-ptm/dictionary.py
+ru-rus-ptm/feat.params
+ru-rus-ptm/feature_transform
+ru-rus-ptm/mdef
+ru-rus-ptm/means
+ru-rus-ptm/mixture_weights
+ru-rus-ptm/noisedict
+ru-rus-ptm/transition_matrices
+ru-rus-ptm/variances
+weather.dmp

@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">SMS</string>
+
+
+    <string name="kws_caption">Для активации Бота скажите \"Андроид\".</string>
+    <string name="menu_caption">Произнесите \"озвучь\"- чтобы прослушать присланное сообщение,
+                                \"имя контакта\"- чтобы прослушать последнее присланное сообщение от него.</string>
+    <string name="digits_caption">Произнесите любые слова что бы перейти в меню.</string>
+    <string name="forecast_caption">Скажите любое слово".</string>
+    <string name="preparation_bot">Подготовка Бота к Работе...</string>
+
+    <string name="speach_not_found">Не удалось распознать фразу:</string>
+    <string name="message_caption">Произнесите любые слова что бы перейти в меню.</string>
+
+    <string name="speech_toggle_on">Запустить Бота</string>
+    <string name="speech_toggle_off">Остановить Бота</string>
+
+    <string name="exit_button">Выход</string>
+
+    <string name="stop_bot">Бот Остановлен</string>
+    <string name="message_not_found">Сообщения от этого контакта не найдены</string>
+
+    <string name="check_box">Оповещения</string>
+
+
+</resources>
