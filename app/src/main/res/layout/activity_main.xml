@@ -1,60 +1,298 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/activity_view"
-    tools:context=".MainActivity"
-    android:background="@color/color" >
+    android:background="@color/color"
+    tools:context=".MainActivity">
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.40218878"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="249dp"
+        android:layout_height="37dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="TextView"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline11" />
 
 
+    <CheckBox
+        android:id="@+id/checkBox2"
+        android:layout_width="219dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/speechToggle"
 
-
-
- <!--   <ImageButton
-        android:id="@+id/imageButton"
-        android:layout_width="46dp"
-        android:layout_height="44dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="34dp"
-        android:layout_marginEnd="28dp"
-        android:layout_center="true"
-        android:background="@drawable/t_button"
-        app:srcCompat="@android:drawable/ic_menu_help" />
--->
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="130dp"
-        android:layout_height="125dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
+        android:layout_below="@id/textView"
+        android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:layout_marginStart="139dp"
-        android:layout_marginTop="280dp"
-        android:adjustViewBounds="false"
-
-        android:cropToPadding="false"
-        app:srcCompat="@drawable/logo_fox" />
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:checked="true"
+        android:drawableRight="?android:attr/listChoiceIndicatorMultiple"
+        android:text="@string/check_box"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:theme="@style/Button"
+        app:layout_constraintBottom_toTopOf="@+id/speechToggle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 
     <ToggleButton
-        android:id="@+id/toggleButton"
+        android:id="@+id/speechToggle"
         android:layout_width="258dp"
         android:layout_height="59dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="false"
-        android:layout_alignParentTop="false"
-        android:layout_alignParentRight="false"
-        android:layout_alignParentBottom="true"
-        android:layout_centerInParent="false"
-        android:layout_centerHorizontal="false"
-        android:layout_marginStart="72dp"
-        android:layout_marginBottom="133dp"
+
+        android:layout_above="@id/button"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/start_stop_button"
         android:text="ToggleButton"
+        android:textOff="@string/speech_toggle_on"
+        android:textOn="@string/speech_toggle_off"
+        app:layout_constraintBottom_toTopOf="@+id/button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="258dp"
+        android:layout_height="59dp"
+
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/exit_button"
+        android:text="@string/exit_button"
+        app:layout_constraintBottom_toTopOf="@+id/guideline10"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <android.support.constraint.Barrier
+        android:id="@+id/barrier3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="left"
+        tools:layout_editor_absoluteX="411dp" />
+
+    <android.support.constraint.Barrier
+        android:id="@+id/barrier4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top" />
+
+    <android.support.constraint.Group
+        android:id="@+id/group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <android.support.constraint.Group
+        android:id="@+id/group2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <android.support.constraint.Barrier
+        android:id="@+id/barrier5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top" />
+
+    <android.support.constraint.Barrier
+        android:id="@+id/barrier6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.9" />
+
+    <android.support.constraint.Barrier
+        android:id="@+id/barrier7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline11"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.5" />
+
+    <android.support.constraint.Barrier
+        android:id="@+id/barrier8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top" />
+
+    <android.support.constraint.Barrier
+        android:id="@+id/barrier9"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top" />
+
+    <android.support.constraint.Barrier
+        android:id="@+id/barrier10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline12"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.6" />
+
+    <ImageView
+        android:id="@+id/imageView11"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toTopOf="@+id/guideline8"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/top_img" />
+
+
+    <ImageView
+
+        android:id="@+id/logo_image"
+        android:layout_width="113dp"
+        android:layout_height="103dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:cropToPadding="false"
+        app:layout_constraintBottom_toTopOf="@+id/guideline11"
+        app:layout_constraintEnd_toEndOf="@+id/barrier3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/logo_fox" />
+</android.support.constraint.ConstraintLayout>
+
+
+
+
+
+
+<!--
+<RelativeLayout
+    android:id="@+id/activity_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color"
+    tools:context=".MainActivity">
+
+
+        <ImageView
+            android:id="@+id/top_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/top_img" />
+
+
+        <ImageView
+
+            android:id="@+id/logo_image"
+            android:layout_width="113dp"
+            android:layout_height="103dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_alignBottom="@id/top_image"
+            android:cropToPadding="false"
+            app:srcCompat="@drawable/logo_fox" />
+
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="249dp"
+        android:layout_height="37dp"
+        android:layout_below="@id/logo_image"
+        android:layout_centerInParent="true"
+        android:text="TextView" />
+
+
+    &lt;!&ndash;   <ImageButton
+             android:id="@+id/imageButton"
+             android:layout_width="46dp"
+             android:layout_height="44dp"
+             android:layout_alignParentTop="true"
+             android:layout_alignParentEnd="true"
+             android:layout_marginTop="34dp"
+             android:layout_marginEnd="28dp"
+             android:layout_center="true"
+             android:background="@drawable/t_button"
+             app:srcCompat="@android:drawable/ic_menu_help" />
+     &ndash;&gt;
+
+    <CheckBox
+        android:id="@+id/checkBox2"
+        android:layout_width="219dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textView"
+
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_above="@+id/speechToggle"
+        android:checked="true"
+        android:drawableRight="?android:attr/listChoiceIndicatorMultiple"
+        android:text="@string/check_box"
         android:textAlignment="center"
+        android:textSize="20sp"
+        android:theme="@style/Button" />
+
+
+    <ToggleButton
+        android:id="@+id/speechToggle"
+        android:layout_width="258dp"
+        android:layout_height="59dp"
+
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_above="@id/button"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/start_stop_button"
+        android:text="ToggleButton"
         android:textOff="@string/speech_toggle_on"
         android:textOn="@string/speech_toggle_off" />
 
@@ -62,48 +300,18 @@
         android:id="@+id/button"
         android:layout_width="258dp"
         android:layout_height="59dp"
-        android:layout_alignParentStart="true"
+
         android:layout_alignParentBottom="true"
-        android:layout_centerInParent="false"
-        android:layout_centerHorizontal="false"
-        android:layout_marginStart="72dp"
-        android:layout_marginBottom="64dp"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="100dp"
         android:background="@drawable/exit_button"
         android:text="@string/exit_button" />
 
-    <CheckBox
-        android:id="@+id/checkBox2"
-        android:layout_width="219dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="212dp"
-        android:checked="true"
-        android:clickable="true"
-        android:drawableRight="?android:attr/listChoiceIndicatorMultiple"
-        android:text="@string/check_box"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        android:theme="@style/Button" />
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="286dp"
-        android:layout_height="42dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_centerInParent="false"
-        android:layout_centerHorizontal="false"
-        android:layout_marginStart="61dp"
-        android:layout_marginTop="426dp"
-        android:text="TextView" />
-
-    <ImageView
-        android:id="@+id/imageView2"
-        android:layout_width="match_parent"
-        android:layout_height="376dp"
-        app:srcCompat="@drawable/top_img" />
 
 
 </RelativeLayout>
+-->
+
+
+
+

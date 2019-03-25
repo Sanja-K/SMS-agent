@@ -17,8 +17,12 @@ import android.support.v4.util.ArrayMap;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +36,10 @@ import static com.example.sms.EntryFile.ContactName;
 //TODO  исправить: Кидает разрешения только для одного случая (Исправлено!)
 
 public class MainActivity extends AppCompatActivity {
+
+
+    private ToggleButton toggle;
+    private CompoundButton.OnCheckedChangeListener toggleListener;
 
     private static final String TAG = "myLogs";
     private static final int PERMISSION_REQUEST_CODE =123 ;
@@ -69,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         ArrayPermission.put("android.permission.READ_EXTERNAL_STORAGE", 2);// разрешения первой очереди
         ArrayPermission.put("android.permission.WRITE_EXTERNAL_STORAGE",2);
@@ -86,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
 
        // MainActivity.PersonMessage = mess.isGiveMessage(cr);
-        final Button button = findViewById(R.id.buttonSMS);
+       // final Button button = findViewById(R.id.buttonSMS);
 
         entryFile=new EntryFile();
         mess=new Message();//если не будет работать убрать это
@@ -106,13 +115,13 @@ public class MainActivity extends AppCompatActivity {
         if( StatusPermiss("android.permission.READ_EXTERNAL_STORAGE") &
                 StatusPermiss("android.permission.WRITE_EXTERNAL_STORAGE") &
                 StatusPermiss("android.permission.READ_CONTACTS")){
-            button.setEnabled(true);
+           // button.setEnabled(true);
             Toast.makeText(getApplicationContext()," Всё разрешения получены! Можете продолжать работу",Toast.LENGTH_SHORT);
 
 
 
         }else{
-            button.setEnabled(false);
+          //  button.setEnabled(false);
 
             String[] arr = (String[]) deniedPermission.toArray(new String[deniedPermission.size()]);//
             Log.d(TAG, "deniedPermissiondeniedPermissiondeniedPermissiondeniedPermissiondeniedPermission"+deniedPermission);
@@ -122,6 +131,9 @@ public class MainActivity extends AppCompatActivity {
             deniedPermission.clear();// что бы не переполнялся одинаковыми значениями
 
         }
+
+
+
 
 /*if(ArrayPermission.get("android.permission.READ_EXTERNAL_STORAGE")==PackageManager.PERMISSION_GRANTED &&
         ArrayPermission.get("android.permission.WRITE_EXTERNAL_STORAGE")==PackageManager.PERMISSION_GRANTED &&
@@ -164,8 +176,30 @@ public class MainActivity extends AppCompatActivity {
         }
 */
 
+        toggle = (ToggleButton)findViewById(R.id.speechToggle);
+        toggleListener = new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton view, boolean isChecked) {
+                if(isChecked){
+                    //     button.setEnabled(true);
+                    MainActivity.PersonMessage = mess.isGiveMessage(cr);
+                    Log.d(TAG, "111111111111111111111111111111111"+PersonMessage);
+                    // entryFile.RewriteDictionary(cr);
+                    PatchFile(cr,nameFileDict);
+                    //entryFile.CombineContactString(cr);
 
-        button.setOnClickListener(new View.OnClickListener() {
+                    //toggle.setEnabled(false);
+
+
+                    //  entryFile.ReadLastLine(CombineContactString(cr),nameFileDict);
+                }else{
+
+                }
+            }
+        };
+
+
+/*        button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
 
 
@@ -180,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
 
               //  entryFile.ReadLastLine(CombineContactString(cr),nameFileDict);
             }
-        });
+        });*/
 
 
 
