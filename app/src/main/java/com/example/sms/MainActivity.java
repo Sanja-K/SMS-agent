@@ -185,7 +185,10 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.PersonMessage = mess.isGiveMessage(cr);
                     Log.d(TAG, "111111111111111111111111111111111"+PersonMessage);
                     // entryFile.RewriteDictionary(cr);
-                    PatchFile(cr,nameFileDict);
+                    PatchFile(cr,entryFile.CombineContactString(cr),nameFileDict);
+
+                    PatchFile(cr,textFilegram+isCreateStringContacts(cr,mess),nameFileGram);
+
                     //entryFile.CombineContactString(cr);
 
                     //toggle.setEnabled(false);
@@ -194,30 +197,10 @@ public class MainActivity extends AppCompatActivity {
                     //  entryFile.ReadLastLine(CombineContactString(cr),nameFileDict);
                 }else{
 
+                    /** Останавливай ТТС И бота*/
                 }
             }
         };
-
-
-/*        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-
-
-               //     button.setEnabled(true);
-                    MainActivity.PersonMessage = mess.isGiveMessage(cr);
-                    Log.d(TAG, "111111111111111111111111111111111"+PersonMessage);
-                   // entryFile.RewriteDictionary(cr);
-                    PatchFile(cr,nameFileDict);
-                    //entryFile.CombineContactString(cr);
-                    button.setEnabled(false);
-
-
-              //  entryFile.ReadLastLine(CombineContactString(cr),nameFileDict);
-            }
-        });*/
-
-
-
 
     }
 
@@ -316,7 +299,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void showNoStoragePermissionSnackbar() {
-        Snackbar.make(MainActivity.this.findViewById(R.id.activity_view), "Без разрешений приложение не может работать" , Snackbar.LENGTH_INDEFINITE)
+        Snackbar.make(MainActivity.this.findViewById(R.id.activity_view), "Не хватает разрешений" , Snackbar.LENGTH_INDEFINITE)
                 .setAction("Настройки", new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -350,7 +333,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    public void PatchFile(ContentResolver cr, String nameFile){
+    public void PatchFile(ContentResolver cr,String textForEntry, String nameFile){
 
         EntryFile entryfile=new EntryFile();
       //  String MessagePerson=isCreateStringContacts(cr,message);
@@ -358,13 +341,35 @@ public class MainActivity extends AppCompatActivity {
         try {
             Assets assets = new Assets(MainActivity.this);
             File assetDir = assets.syncAssets();
-            entryfile.ReadLastLine(assetDir, entryfile.CombineContactString(cr),nameFile);
+            entryfile.ReadLastLine(assetDir,textForEntry,nameFile);
 
         } catch (IOException e) {
         System.out.println("Ошибка при записи в файл :"+ nameFile);
         }
     }
 
+
+
+    public  String isCreateStringContacts(ContentResolver cr,Message message){
+
+        MainActivity.PersonMessage = message.isGiveMessage(cr);
+        String MessageKey="";
+
+        for (String key : PersonMessage.keySet()) {
+            if(key.matches("^[а-яё\" \"]+$")){
+                MessageKey=MessageKey + " | "+ key ;
+
+            }
+            Log.d(TAG,"000000000000000000000000000000000000000000000000000000000000000000000000000000000000  "+PersonMessage);
+        }
+        //   Log.d(TAG,"000000000000000000000000000000000000000000000000000000000000000000000000000000000000  "+MessageKey);
+
+        MessageKey=MessageKey.substring(3);
+        Log.d(TAG,"111111111111111111111111111111111111111111111111111111111111111111111111111  "+MessageKey);
+        MessageKey= MessageKey +"; ";
+
+        return MessageKey;
+    }
 
 
 /*    public void requestPermissionWithRationale() {
