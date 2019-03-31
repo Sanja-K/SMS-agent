@@ -1,5 +1,6 @@
 package com.example.sms;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -35,8 +36,10 @@ import static com.example.sms.EntryFile.ContactName;
 
 //TODO  исправить: Кидает разрешения только для одного случая (Исправлено!)
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Permission {
 
+
+   // public Context mContext;
 
     private ToggleButton toggle;
     private CompoundButton.OnCheckedChangeListener toggleListener;
@@ -52,12 +55,20 @@ public class MainActivity extends AppCompatActivity {
     public Message mess;//если не будет работать убрать это
     public EntryFile entryFile;
 
+    public Permission perm;
 
     String nameFileGram="menu.gram";
     String nameFileDict="contact.dict";
 
     String textFilegram= "#JSGF V1.0;"+"\n"+"grammar menu;"+"\n"+"public <item> = озвуч | ";
 
+
+    String MassPermisiion[]={"android.permission.READ_EXTERNAL_STORAGE",
+                             "android.permission.WRITE_EXTERNAL_STORAGE",
+                             "android.permission.READ_CONTACTS",
+                             "android.permission.READ_SMS",
+                             "android.permission.RECEIVE_SMS",
+                             "android.permission.RECORD_AUDIO" };
     //SmsMessage message = SmsMessage.createFromPdu(pdu);
 
   //  OnPermissionRequested mPermissionRequest; //для интерфейса проверки разрешений
@@ -90,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
 
 
       final int indexResol;
+
        // cr=getContentResolver();//если не будет работать убрать это
       //  mess=new Message();//если не будет работать убрать это
 
@@ -101,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
         mess=new Message();//если не будет работать убрать это
         mAssetManager = getAssets();
         cr=getContentResolver();//если не будет работать убрать это
+      //  perm =new Permission();
 
 /*        *//* проверяю статус разрешения и записываею его в значение ArrayMap, ключом является название разрешения *//*
         for (int i=0;i<ArrayPermission.size();i++){
@@ -111,10 +124,10 @@ public class MainActivity extends AppCompatActivity {
    /*     StatusPermiss("android.permission.READ_EXTERNAL_STORAGE");
         StatusPermiss("android.permission.WRITE_EXTERNAL_STORAGE");
         StatusPermiss("android.permission.READ_CONTACTS");*/
-
-        if( StatusPermiss("android.permission.READ_EXTERNAL_STORAGE") &
-                StatusPermiss("android.permission.WRITE_EXTERNAL_STORAGE") &
-                StatusPermiss("android.permission.READ_CONTACTS")){
+/*
+        if( perm.StatusPermiss(MainActivity.this,"android.permission.READ_EXTERNAL_STORAGE") &
+                perm.StatusPermiss(MainActivity.this,"android.permission.WRITE_EXTERNAL_STORAGE") &
+                perm.StatusPermiss(MainActivity.this,"android.permission.READ_CONTACTS")){
            // button.setEnabled(true);
             Toast.makeText(getApplicationContext()," Всё разрешения получены! Можете продолжать работу",Toast.LENGTH_SHORT);
 
@@ -126,55 +139,18 @@ public class MainActivity extends AppCompatActivity {
             String[] arr = (String[]) deniedPermission.toArray(new String[deniedPermission.size()]);//
             Log.d(TAG, "deniedPermissiondeniedPermissiondeniedPermissiondeniedPermissiondeniedPermission"+deniedPermission);
             Log.d(TAG, "arrarrarrarrarrarrarrarrarrarrarrarrarrarrarrarrarrarrarrarr "+arr);
-            ActivityCompat.requestPermissions(this,
+            ActivityCompat.requestPermissions(MainActivity.Context(),
                      arr, PERMISSION_REQUEST_CODE); // не уверен что будет работать
             deniedPermission.clear();// что бы не переполнялся одинаковыми значениями
 
-        }
+        }*/
+
+
+       MainActivity.super.StatusPermiss(this,MassPermisiion);
 
 
 
 
-/*if(ArrayPermission.get("android.permission.READ_EXTERNAL_STORAGE")==PackageManager.PERMISSION_GRANTED &&
-        ArrayPermission.get("android.permission.WRITE_EXTERNAL_STORAGE")==PackageManager.PERMISSION_GRANTED &&
-        ArrayPermission.get("android.permission.READ_CONTACTS")==PackageManager.PERMISSION_GRANTED){
-    Toast.makeText(getApplicationContext()," Всё разрешения получены! Можете продолжать работу",Toast.LENGTH_SHORT);
-
-}else{
-
-
-
-
-}*/
-
-   /*     requestPermission(Manifest.permission.READ_CONTACTS,Manifest.permission.RECEIVE_SMS,
-                new OnPermissionRequested() {
-                    @Override
-                    public void onGranted() {
-                        // what you want to do
-                        Log.d(TAG,"активноактивноактивноактивноактивноактивноактивноактивноактивноактивноактивноактивноактивноактивно  ");
-                    }
-                });*/
-
-
-/*
-        if(ContextCompat.checkSelfPermission(getBaseContext(), "android.permission.READ_SMS") == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(getBaseContext(), "android.permission.RECEIVE_SMS") == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(getBaseContext(), "android.permission.READ_CONTACTS") == PackageManager.PERMISSION_GRANTED)  {
-
-            indexResol=1;
-          //  button.setEnabled(true);
-            button.setText("активно");
-            Log.d(TAG,"активноактивноактивноактивноактивноактивноактивноактивноактивноактивноактивноактивноактивноактивно  ");
-        }else {
-            final int REQUEST_CODE_ASK_PERMISSIONS=123;
-            indexResol=0;
-            Log.d(TAG,"неактивнонеактивнонеактивнонеактивнонеактивнонеактивнонеактивнонеактивнонеактивнонеактивнонеактивно");
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{"android.permission.READ_SMS", "android.permission.RECEIVE_SMS","android.permission.READ_CONTACTS"}, REQUEST_CODE_ASK_PERMISSIONS);
-          //  button.setEnabled(false);
-            button.setText("неактивно");
-        }
-*/
 
         toggle = (ToggleButton)findViewById(R.id.speechToggle);
         toggleListener = new CompoundButton.OnCheckedChangeListener() {
@@ -204,8 +180,16 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+
+
+/*
+
+
     public boolean StatusPermiss (String NamePermission){
-        /* проверяю статус разрешения и записываею его в значение ArrayMap, ключом является название разрешения */
+        */
+/* проверяю статус разрешения и записываею его в значение ArrayMap, ключом является название разрешения *//*
+
             int statusPermission =ContextCompat.checkSelfPermission(this, NamePermission);
          //   ArrayPermission.indexOfKey(NamePermission) ;
         //    ArrayPermission.setValueAt(ArrayPermission.indexOfKey(NamePermission), statusPermission);
@@ -250,7 +234,9 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        if(deniedPermission.size()>0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)/*Возможно длинна эрэй листа работает некорректно */{
+        if(deniedPermission.size()>0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)*/
+/*Возможно длинна эрэй листа работает некорректно *//*
+{
 
             showNoStoragePermissionSnackbar();
 
@@ -259,42 +245,6 @@ public class MainActivity extends AppCompatActivity {
 //разрешения получены ,можно продолжать работу
         }
     }
-/*
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        boolean allowed = true;
-        switch (requestCode) {
-            case PERMISSION_REQUEST_CODE :
-                for (int res: grantResults){
-                    allowed = allowed && (res == PackageManager.PERMISSION_GRANTED);
-                }
-
-                break;
-
-            default:
-                allowed=false;
-                break;
-        }
-
-        if (allowed){
-            //user granted all permissions we can perform our task.
-           // makeFolder();
-        }
-        else {
-            // we will give warning to user that they haven't granted permissions.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)){
-                    Toast.makeText(this, "Разрешения не получены!.", Toast.LENGTH_SHORT).show();
-
-                } else {
-                  //  showNoStoragePermissionSnackbar();
-                }
-            }
-        }
-
-
-    }
-    */
 
 
 
@@ -306,7 +256,9 @@ public class MainActivity extends AppCompatActivity {
                         openApplicationSettings();
 
                         Toast.makeText(getApplicationContext(),
-                                "Пожалуйста, дайте все необходимые разрешения :"+deniedPermission, /* вставитть массив с имена разрешений, которым нужен доступ*/
+                                "Пожалуйста, дайте все необходимые разрешения :"+deniedPermission, */
+/* вставитть массив с имена разрешений, которым нужен доступ*//*
+
                                 Toast.LENGTH_SHORT);
                     }
                 })
@@ -330,6 +282,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+*/
 
 
 
@@ -372,168 +325,278 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-/*    public void requestPermissionWithRationale() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                String.valueOf(deniedPermission))) {// поставить массив из разрешений, убрать валъю оф есл ине будет работать
-            final String message = "Разрешения необходимы для функционированя приложения";
-            Snackbar.make(MainActivity.this.findViewById(R.id.activity_view), message, Snackbar.LENGTH_LONG)
-                    .setAction("GRANT", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            requestPerms();
-                        }
-                    })
-                    .show();
-        } else {
-            requestPerms();
-        }
-    }
-
-    private void requestPerms(){// поставить массив из разрешений
-      //  String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            ActivityCompat.requestPermissions(this,new  String[]{String.valueOf(deniedPermission)},
-                    PERMISSION_REQUEST_CODE); //подозрительная строка String.valueOf(deniedPermission)
-                                                // -deniedPermission динамический массив с имена запрещённых разрешений
-        }
-    }
-
-    */
 
 
 
 
-
-   /* public interface OnPermissionRequested {
-        void onGranted();
-    }
+/*
 
 
+    private void initializeSMSReceiver(){
 
-    protected void requestPermission(String readContacts, String permission, OnPermissionRequested listener) {
+        smsReceiver = new BroadcastReceiver(){
+            @Override
+            public void onReceive(Context context, Intent intent) {
 
-        mPermissionRequest = listener;
+                Bundle bundle = intent.getExtras();
 
-        // Here, thisActivity is the current activity
-        if (ContextCompat.checkSelfPermission(this, permission)
-                != PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(getBaseContext(), readContacts) == PackageManager.PERMISSION_GRANTED)
-        {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
-                Toast.makeText(this, "У вас не достаточно разрешений для функциониования приложения.", Toast.LENGTH_SHORT).show();
-            } else {
-                // request the permission.
-                ActivityCompat.requestPermissions(this,
-                        new String[]{permission}, 2456);
+                String text = null;
+                String sender;
+                if(bundle!=null){
+
+                    Object[] pdus = (Object[])bundle.get("pdus");
+                    for(int i=0;i<pdus.length;i++){
+                        byte[] pdu = (byte[])pdus[i];
+                        SmsMessage message = SmsMessage.createFromPdu(pdu);
+
+                        text = message.getDisplayMessageBody();
+                        sender = mess.getContactName(message.getOriginatingAddress(),cr);
+
+                        speaker.speak("Пришло Сообщение от абонента"+sender+ "!");
+                    }
+                    setResultData(text);
+                }
             }
-        } else {
-            mPermissionRequest.onGranted();
+        };
+    }
+
+    private void checkTTS(){
+        Intent check = new Intent();
+        check.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+        startActivityForResult(check, CHECK_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == CHECK_CODE){
+            if(resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS){
+                speaker = new Speaker(this);
+            }else {
+                Intent install = new Intent();
+                install.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                startActivity(install);
+            }
         }
+    }
+
+
+    private void registerSMSReceiver() {
+        IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
+        registerReceiver(smsReceiver, intentFilter);
+    }
+
+    public void PatchFile(ContentResolver cr,Message message){
+
+        EntryFile entryfile=new EntryFile();
+        String MessagePerson=isCreateStringContacts(cr,message);
+
+        try {
+            Assets assets = new Assets(PocketSphinxActivity.this);
+            File assetDir = assets.syncAssets();
+            entryfile.ReadLastLine(assetDir,MessagePerson);
+
+        } catch (IOException e) {
+
+        }
+    }
+
+
+    public void runRecognizerSetup() {
+        new AsyncTask<Void, Void, Exception>() {
+            @Override
+            protected Exception doInBackground(Void... params) {
+                try {
+                    Assets assets = new Assets(PocketSphinxActivity.this);
+                    File assetDir = assets.syncAssets();
+                    setupRecognizer(assetDir);
+                    recognizer.startListening(KWS_SEARCH);
+
+                    soundPlayback.playSound(soundIdreadiness);
+
+                } catch (IOException e) {
+                    return e;
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Exception result) {
+                if (result != null) {
+                    ((TextView) findViewById(R.id.caption_text))
+                            .setText(R.string.speach_not_found +" "+ result);
+                } else {
+                    switchSearch(KWS_SEARCH);
+
+                }
+            }
+        }.execute();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        if (grantResults.length > 0
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            if (mPermissionRequest != null)
-                mPermissionRequest.onGranted();
+                                           String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == PERMISSIONS_REQUEST_RECORD_AUDIO) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                runRecognizerSetup();
+            } else {
+                finish();
+            }
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (recognizer != null) {
+            recognizer.cancel();
+            recognizer.shutdown();
+        }
+
+        if(smsReceiver!=null){
+            unregisterReceiver(smsReceiver);
+        }
+        if(speaker!=null){
+            speaker.destroy();
+        }
+        soundPool.release();
+        soundPool = null;
     }
 */
 
-/*    private void registerSMSReceiver() {
-        IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
-        registerReceiver(smsReceiver, intentFilter);
-    }*/
+    /**
+     * In partial result we get quick updates about current hypothesis. In
+     * keyword spotting mode we can react here, in other modes we need to wait
+     * for final result in onResult.
+     */
+ /*   @Override
+    public void onPartialResult(Hypothesis hypothesis) {
+        Message mess= new Message();
+        ContentResolver cr =getContentResolver();
+        String bodyMessage;
 
+        if (hypothesis == null)
+            return;
 
+        String text = hypothesis.getHypstr();
 
-/*    public void getAllSms(Context context) {
-
-        ContentResolver cr = context.getContentResolver();
-        Cursor c = cr.query(Telephony.Sms.CONTENT_URI, null, null, null, null);
-        int totalSMS = 0;
-        if (c != null) {
-            totalSMS = c.getCount();
-            if (c.moveToFirst()) {
-                for (int j = 0; j < totalSMS; j++) {
-                    String smsDate = c.getString(c.getColumnIndexOrThrow(Telephony.Sms.DATE));
-                    String number = c.getString(c.getColumnIndexOrThrow(Telephony.Sms.ADDRESS));
-                    String body = c.getString(c.getColumnIndexOrThrow(Telephony.Sms.BODY));
-                    Date dateFormat= new Date(Long.valueOf(smsDate));
-                    String type;
-                    switch (Integer.parseInt(c.getString(c.getColumnIndexOrThrow(Telephony.Sms.TYPE)))) {
-                        case Telephony.Sms.MESSAGE_TYPE_INBOX:
-                            type = "inbox";
-                            break;
-                        case Telephony.Sms.MESSAGE_TYPE_SENT:
-                            type = "sent";
-                            break;
-                        case Telephony.Sms.MESSAGE_TYPE_OUTBOX:
-                            type = "outbox";
-                            break;
-                        default:
-                            break;
-                    }
-
-
-                    c.moveToNext();
-                }
-            }
-
-            c.close();
-
-        } else {
-            Toast.makeText(this, "No message to show!", Toast.LENGTH_SHORT).show();
+        if (text.equals(KEYPHRASE)){
+            switchSearch(MENU_SEARCH);
+            soundPlayback.playSound(soundIdactivation);
+            //  soundPlayback.playSound(soundIdreadiness);
         }
+
+        else if (text.equals(FORECAST_SEARCH)){
+            speaker.speak(smsReceiver.getResultData());
+            switchSearch(FORECAST_SEARCH);
+        }
+
+        else if (PersonMessage.containsKey(text)){
+            *//** проверить на корректность *//*
+            bodyMessage=mess.MessageOutput(text,cr);
+            SpeachMessage(bodyMessage);
+            switchSearch(FORECAST_SEARCH);
+        }
+        else{
+            //((TextView) findViewById(R.id.result_text)).setText(text);
+        }
+    }
+
+    public void SpeachMessage(String bodyMessage){
+        if(bodyMessage==null){
+            speaker.speak(getString(R.string.message_not_found));
+        }else{
+            speaker.speak(bodyMessage);
+        }
+    }
+*/
+    /**
+     * This callback is called when we stop the recognizer.
+     */
+/*    @Override
+    public void onResult(Hypothesis hypothesis) {*/
+        /** getContentResolver() в будущем надо убрать
+         он нужен для Context Который не передаётся из класса Message*/
+
+        //((TextView) findViewById(R.id.result_text)).setText("");
+     //   if (hypothesis != null) {
+         //   String text = hypothesis.getHypstr();
+
+            // makeText(this, text, Toast.LENGTH_SHORT).show(); /** выводит результат распознавание в тостах */
+     //   }
+  //  }
+
+  /*  @Override
+    public void onBeginningOfSpeech() {
     }*/
 
-/*    // Create Inbox box URI
-    Uri inboxURI = Uri.parse("content://sms/inbox");
-
-    // List required columns
-    String[] reqCols = new String[] { "_id", "address", "body" };
-
-    // Get Content Resolver object, which will deal with Content Provider
-    ContentResolver cr = getContentResolver();
-
-    // Fetch Inbox SMS Message from Built-in Content Provider
-    Cursor c = cr.query(inboxURI, reqCols, null, null, null);*/
-
-
+    /**
+     * We stop recognizer here to get a final result
+     */
 /*
-    public class SmsReceiver extends BroadcastReceiver {
+    @Override
+    public void onEndOfSpeech() {
+        if (!recognizer.getSearchName().equals(KWS_SEARCH))
+            switchSearch(KWS_SEARCH);
+    }
 
-        private static final String SMS_RECEIVED = "android.provider.Telephony.SMS_RECEIVED";
+    private void switchSearch(String searchName) {
+        recognizer.stop();
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(SMS_RECEIVED)) {
-                Bundle bundle = intent.getExtras();
-                if (bundle != null) {
-                    // get sms objects
-                    Object[] pdus = (Object[]) bundle.get("pdus");
-                    if (pdus.length == 0) {
-                        return;
-                    }
-                    // large message might be broken into many
-                    SmsMessage[] messages = new SmsMessage[pdus.length];
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < pdus.length; i++) {
-                        messages[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
-                        sb.append(messages[i].getMessageBody());
-                    }
-                    String sender = messages[0].getOriginatingAddress();
-                    String message = sb.toString();
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-                    // prevent any other broadcast receivers from receiving broadcast
-                    // abortBroadcast();
-                }
-            }
-        }
-    }*/
+        // If we are not spotting, start listening with timeout (10000 ms or 10 seconds).
+        if (searchName.equals(KWS_SEARCH))
+            recognizer.startListening(searchName);
+        else
+            recognizer.startListening(searchName, 10000);
 
+        String caption = getResources().getString(captions.get(searchName));
+        ((TextView) findViewById(R.id.caption_text)).setText(caption);
+    }
+
+    private void setupRecognizer(File assetsDir) throws IOException {
+
+        recognizer = SpeechRecognizerSetup.defaultSetup()
+                .setAcousticModel(new File(assetsDir, "ru-rus-ptm"))
+                .setDictionary(new File(assetsDir, "ru-ru.dict"))
+                .setRawLogDir(assetsDir) // To disable logging of raw audio comment out this call (takes a lot of space on the device)
+
+                .setRawLogDir(assetsDir).setKeywordThreshold(1e-20f)
+                .setFloat("-beam", 1e-30f)
+
+                .getRecognizer();
+        recognizer.addListener(this);
+*/
+
+        /** In your application you might not need to add all those searches.
+         * They are added here for demonstration. You can leave just one.
+         */
+/*
+
+        // Create keyword-activation search.
+        recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
+
+        // Create grammar-based search for selection between demos
+        File menuGrammar = new File(assetsDir, "menu.gram");
+        recognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);
+
+        // Create language model search
+        File languageModel = new File(assetsDir, "weather.dmp");
+        recognizer.addNgramSearch(FORECAST_SEARCH, languageModel);
+
+    }
+
+    @Override
+    public void onError(Exception error) {
+        ((TextView) findViewById(R.id.caption_text)).setText(error.getMessage());
+    }
+
+    @Override
+    public void onTimeout() {
+        switchSearch(KWS_SEARCH);
+    }
+*/
 
 
 
