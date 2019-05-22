@@ -13,7 +13,7 @@ import android.util.Log;
  * Created by 1 on 25.05.2017.А
  */
 
-//TODO надо проверить работоспособность озвучивания сообщений
+
 
 public class Message extends MainActivity {
 
@@ -21,7 +21,7 @@ public class Message extends MainActivity {
 
     private static final String TAG = "myLogs";
 
-    /** Сравнивает телефон отправителя с контактами */ /* TODO проверить что вытаскивает getContactName и сравнить с RewriteDictionary */
+    /** Сравнивает телефон отправителя с контактами */
     public String getContactName(String phone, ContentResolver cr ){
         String ContactName=null;
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phone));
@@ -71,12 +71,11 @@ public class Message extends MainActivity {
                     String Contact= c.getString(1).toLowerCase();
 
                     if(contactName!=null){
-                       // Contact =contactName.toLowerCase().replaceAll(" ","");
+
                         Contact =contactName.toLowerCase();
                     }
 
                     MessagePerson.put(Contact,c.getString(2));
-                  //  Log.d(TAG,"22222222222222222222222222222222222222222222222222222222222" +MessagePerson);
 
                 }while (c.moveToNext());
             }

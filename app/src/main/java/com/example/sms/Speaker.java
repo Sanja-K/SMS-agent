@@ -30,11 +30,21 @@ public class Speaker implements TextToSpeech.OnInitListener{
 
     @Override
     public void onInit(int status) {
+        System.out.println(" Status "+status);
         if(status == TextToSpeech.SUCCESS){
+            if(tts.isLanguageAvailable(new Locale(Locale.getDefault().getLanguage()))==
+                    TextToSpeech.LANG_AVAILABLE){
 
-            Locale locale=new Locale("ru");
-            tts.setLanguage(locale);
-            ready = true;
+                System.out.println(" Locale "+Locale.getDefault()+"   "+TextToSpeech.LANG_AVAILABLE);
+                ready = true;
+                tts.setLanguage(new Locale(Locale.getDefault().getLanguage()));
+            } else{
+
+                Locale locale=new Locale("ru");
+                tts.setLanguage(locale);
+                ready = true;
+            }
+
         }else{
             ready = false;
         }
@@ -42,11 +52,19 @@ public class Speaker implements TextToSpeech.OnInitListener{
 
     public void speak(String text){
 
+        System.out.println("Проверка доступности русского языка для ТТС " +ready);
         if(ready ) {
-            HashMap<String, String> hash = new HashMap<String,String>();
-            hash.put(TextToSpeech.Engine.KEY_PARAM_STREAM,
-                    String.valueOf(AudioManager.STREAM_NOTIFICATION));
-            tts.speak(text, TextToSpeech.QUEUE_ADD, hash);
+
+            String utteranceId = this.hashCode() + "";
+            if(text!=null){
+
+                tts.speak(text, TextToSpeech.QUEUE_ADD, null, utteranceId);
+            }else{
+                text="У вас отсутсвуют присланные сообщения";
+                tts.speak(text, TextToSpeech.QUEUE_ADD, null, utteranceId);
+            }
+
+
         }
     }
 

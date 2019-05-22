@@ -1,8 +1,14 @@
 package com.example.sms;
 
 import android.annotation.TargetApi;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.media.AudioAttributes;
+import android.media.SoundPool;
 import android.os.Build;
+import android.util.Log;
+
+import java.io.IOException;
 
 public class SoundPlayback extends MainActivity{
 
@@ -14,25 +20,21 @@ public class SoundPlayback extends MainActivity{
                 .setUsage(AudioAttributes.USAGE_GAME)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .build();
-       /* soundPool = new SoundPool.Builder()
+        soundPool = new SoundPool.Builder()
                 .setAudioAttributes(attributes)
-                .build();*/
+                .build();
     }
 
-    @SuppressWarnings("deprecation")
-    public void createOldSoundPool() {
-      //  soundPool = new SoundPool(3, AudioManager.STREAM_MUSIC, 100);
-    }
 
     public int playSound(int sound) {
         int mStreamID = -1;
-      /*  if (sound > 0 && soundOn) {
+        if (sound > 0 && soundOn) {
             mStreamID = soundPool.play(sound, 1, 1, 1, 0, 1);
-        }*/
+        }
         return mStreamID;
     }
 
-  /*  public int loadSound(String fileName, AssetManager mAssetManager) {
+    public int loadSound(String fileName, AssetManager mAssetManager) {
 
         AssetFileDescriptor afd;
 
@@ -44,6 +46,6 @@ public class SoundPlayback extends MainActivity{
             return -1;
         }
         return soundPool.load(afd, 1);
-    }*/
+    }
 
 }

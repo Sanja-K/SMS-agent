@@ -23,11 +23,12 @@ public  class EntryFile extends MainActivity {
 
     //String result = null;
     /**TODO Этот строка для записиси в файл menu.gram, мы передаём её в классе MainACTIVITY */
+    /**TODO Улучшить алгоритм записиси словаря */
+    private static final String KEYPHRASE = "андроид";
+    private static final String FORECAST_SEARCH = "озвуч";
 
 
-    String nameFileGram="menu.gram";
-    String nameFileDict="contact.dict";
-    /** ArrayMap ContactName хранит в качестве ключей имена имена (фамилии,отчества) контактов, а в качестве*/
+    /** ArrayMap ContactName хранит в качестве ключей имена(фамилии,отчества) контактов, а в качестве*/
   public static final ArrayMap <String,String> ContactName=new ArrayMap<>();
 
 
@@ -69,7 +70,7 @@ public  class EntryFile extends MainActivity {
 
 
 /** Перезаписывает файл граматики*/
-/*TODO переписать функцию для перезаписи файлов( данные для записи в файл должны передавтаься как парамметр) */
+/*TODO переписать функцию для перезаписи файлов( данные для записи в файл должны передавтаься как парамметр)Сделано */
     public  void ReadLastLine(File file, String MessagePerson,String nameFile) throws IOException {
 
         File f = new File( file,nameFile);
@@ -77,14 +78,8 @@ public  class EntryFile extends MainActivity {
         /** заменяю последнюю строку на строку имен отправителей сообщений*/
 
         PrintWriter prWr = new PrintWriter(new BufferedWriter(new FileWriter(f, false)));
-       /* String result = null;
-        result= "#JSGF V1.0;"+"\n"+"grammar menu;"+"\n"+"public <item> = озвуч | "+MessagePerson ;*/
-
-        Log.d(LOG_TAG,"qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"+MessagePerson);
 
         /**  перезаписываю файл с новой строкой имен отправителей сообщений (всё это должно производиться до инициализации слашателя PocketSpinx) */
-
-        /*prWr.write(result);*/
 
         prWr.write(MessagePerson);
 
@@ -101,36 +96,18 @@ public  class EntryFile extends MainActivity {
 
         Cursor cursor = cr.query(ContactsContract.Data.CONTENT_URI, null, null, null, null);
 
-        int indexGivenName = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME);
-        int indexFamilyName = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME);
         int indexDisplayName = cursor.getColumnIndexOrThrow(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME);
 
         while (cursor.moveToNext()) {
 
-            String name = cursor.getString(indexGivenName); /** выводит поле с именем контакта (toLowerCase не работает на это поле) */
-            String family = cursor.getString(indexFamilyName);/** выводит поле с фамилия контакта (toLowerCase не работает на это поле) */
             String display = cursor.getString(indexDisplayName).toLowerCase(); /** выводит имя и фамиилию в одном поле */
-
-            Log.d(LOG_TAG,"ContactNameContactNameContactNameContactNameContactNameContactName имя "+name +" фамилия "  +family +" дисплей " + display);
-
 
             CheckContact(display);
 
-
-          /*  if(display.matches("^[а-яё\" \"]+$")){
-
-                Log.d(LOG_TAG,"33333333333333333333333333333 " +display);
-                ContactName.put(display,RewrCont(display));
-            }*/
        }
 
-        Log.d(LOG_TAG,"NameNameNameNameNameNameNameNameName"+ContactName);
-
-/** вывод Имён контактов и их фонетическую транскрипцию*/
-       /* for (Map.Entry entry : ContactName.entrySet()) {
-            System.out.println("Ключ: " + entry.getKey() + " Значение: "
-                    + entry.getValue());
-        }*/
+        CheckDublicationName(FORECAST_SEARCH);
+        CheckDublicationName(KEYPHRASE);
        return ContactName;
     }
 
@@ -149,33 +126,21 @@ public  class EntryFile extends MainActivity {
             }
         }
 
-
      switch (index){
 
          case 0:{
              CheckDublicationName(сontName);
-
-            /* if(ContactName.containsKey(сontName)){
-                 ContactName.put(сontName,RewrCont(сontName));
-             }*/
-
-
              break;
          }
 
          case 1:{
                 /** Проверка на наличиие пробела в display имени контакта*/
 
-             Log.d(LOG_TAG,"Имя контакта сontNameсontNameсontNameсontName "+ сontName);
-
              String contact[]=сontName.split("(\\s)+");
 
-             Log.d(LOG_TAG,"Имя контакта contactcontactcontactcontact "+ contact);
-
              for (String con:contact){
-                 Log.d(LOG_TAG,"Имя контакта содержит некорректные символы "+ con);
+                 Log.d(LOG_TAG,"Имя контакта "+ con);
                  CheckDublicationName(con);
-
              }
              break;
          }
@@ -192,7 +157,6 @@ public  class EntryFile extends MainActivity {
     public void CheckDublicationName(String ContName){
         if(!ContactName.containsKey(ContName)){
             ContactName.put(ContName,RewrCont(ContName));
-            Log.d(LOG_TAG,"CheckDublicationNameCheckDublicationNameCheckDublicationName "+ContactName );
         }
 
     }
@@ -207,20 +171,14 @@ public  class EntryFile extends MainActivity {
         for(int i=0;i< charArrayNameContact.length;i++){
             char sum=charArrayNameContact[i];
             String sumbol = Character.toString(sum);
-            Log.d(LOG_TAG," RewrContRewrContRewrContRewrContRewrContRewrContRewrCont " +
-                    "charArrayNameContact[i]charArrayNameContact[i] "+ charArrayNameContact[i]+ "  " +charDict.containsKey(sumbol) );
 
             if(charDict.containsKey(sumbol)){
 
 
                 resultStr=resultStr+ " " +charDict.get(sumbol);
-                Log.d(LOG_TAG,"resultStr resultStr resultStr resultStr resultStr resultStr "+resultStr);
+
             }
-
         }
-
-       // String dictCont= Arrays.toString(charCon);
-       // Log.d(LOG_TAG,"dictdictdictdictdictdictdictdictdictdictdictdictdictdict "+dictCont);
 
         return resultStr;
     }
@@ -240,9 +198,6 @@ public  class EntryFile extends MainActivity {
             System.out.println("Ключ: " + entry.getKey() + " Значение: "
                     + entry.getValue());
         }
-
-
-        System.out.println("РезультатРезультатРезультатКонечныйКонечныйКонечныйКонечныйКонечныйКонечныйКонечный: " + buffer);
 
         res= String.valueOf(buffer);
 

@@ -3,23 +3,30 @@ package com.example.sms;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.media.SoundPool;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.ArrayMap;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.SmsMessage;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,18 +35,61 @@ import android.widget.ToggleButton;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import edu.cmu.pocketsphinx.Assets;
+import edu.cmu.pocketsphinx.Hypothesis;
+import edu.cmu.pocketsphinx.RecognitionListener;
+import edu.cmu.pocketsphinx.SpeechRecognizer;
+import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
 import static com.example.sms.EntryFile.ContactName;
 
 
 //TODO  исправить: Кидает разрешения только для одного случая (Исправлено!)
+//TODO  Сравнить со старыми методами Сфинкса
 
-public class MainActivity extends Permission {
+public class MainActivity extends Permission implements RecognitionListener {
+
+    /**Нам нужна только ключевая фраза, чтобы начать распознавание, одно меню со списком вариантов,
+       и одно слово, которое требуется для метода switchSearch - это позволит распознавателю
+       вернуться к прослушиванию ключевой фразы*/
+
+    private HashMap<String, Integer> captions;
+    //TODO не забыть записать управляющий фразы в словарь
+
+    private static final String KEYPHRASE = "андроид";/** активационная фраза*/
 
 
-   // public Context mContext;
+    private static final String KWS_SEARCH = "wakeup";
+    private static final String FORECAST_SEARCH = "озвуч";
+    private static String DIGITS_SEARCH = "сообщение";
+
+    /** добавить ещё одну константу приравнивающую  себе MessageKey из isCreateStringContacts*/
+
+    private static final String PHONE_SEARCH = "";
+    private static final String MENU_SEARCH = "меню";
+
+    //public static String MESSAGE_SEARCH="светка";
+    public static String MESSAGE_SEARCH="";/** Имя контакта, для чтения последнего
+                                                присланного им сооьщения*/
+
+    /** Для класса Speaker  */
+    private final int CHECK_CODE = 0x1;
+    private final int LONG_DURATION = 5000;
+    private final int SHORT_DURATION = 1200;
+
+    private Speaker speaker;
+    private static final int PERMISSIONS_REQUEST_RECORD_AUDIO = 1;/** для разрешений( надо заменить метод с этой константой*/
+
+    public SoundPool soundPool;
+    public SoundPlayback soundPlayback;
+
+    public int soundIdreadiness;
+    public int soundIdactivation;
+    public static boolean soundOn= true;
+    private SpeechRecognizer recognizer;
+
 
     private ToggleButton toggle;
     private CompoundButton.OnCheckedChangeListener toggleListener;
@@ -51,8 +101,8 @@ public class MainActivity extends Permission {
     public AssetManager mAssetManager;
     public static ArrayMap<String, String> PersonMessage;
 
-    public ContentResolver cr;//если не будет работать убрать это
-    public Message mess;//если не будет работать убрать это
+    public ContentResolver cr;
+    public Message mess;
     public EntryFile entryFile;
 
     public Permission perm;
@@ -69,20 +119,11 @@ public class MainActivity extends Permission {
                              "android.permission.READ_SMS",
                              "android.permission.RECEIVE_SMS",
                              "android.permission.RECORD_AUDIO" };
-    //SmsMessage message = SmsMessage.createFromPdu(pdu);
 
-  //  OnPermissionRequested mPermissionRequest; //для интерфейса проверки разрешений
-  // public static  ArrayMap<String,String> Permission; // добавть вместо ключей название разрешений
 
     public static  ArrayMap<String , Integer> ArrayPermission= new ArrayMap<>();
 
    static ArrayList<String> deniedPermission= new ArrayList<>();
-   // String[] mice = { "4", "8", "10", "12", "16" };
-
-
-   /* public SoundPool soundPool;
-    public static boolean soundOn= true;*/
-   // EntryFile entryfile=new EntryFile();
 
 
     @Override
@@ -99,58 +140,41 @@ public class MainActivity extends Permission {
         ArrayPermission.put("android.permission.RECORD_AUDIO",2);
 
 
-
-      final int indexResol;
-
-       // cr=getContentResolver();//если не будет работать убрать это
-      //  mess=new Message();//если не будет работать убрать это
-
-
-       // MainActivity.PersonMessage = mess.isGiveMessage(cr);
-       // final Button button = findViewById(R.id.buttonSMS);
+        captions = new HashMap<String, Integer>();
+        captions.put(KWS_SEARCH, R.string.kws_caption);
+        captions.put(MENU_SEARCH, R.string.menu_caption);
+        captions.put(DIGITS_SEARCH, R.string.digits_caption);
+        captions.put(FORECAST_SEARCH, R.string.forecast_caption);
 
         entryFile=new EntryFile();
-        mess=new Message();//если не будет работать убрать это
+        mess=new Message();
         mAssetManager = getAssets();
-        cr=getContentResolver();//если не будет работать убрать это
-      //  perm =new Permission();
-
-/*        *//* проверяю статус разрешения и записываею его в значение ArrayMap, ключом является название разрешения *//*
-        for (int i=0;i<ArrayPermission.size();i++){
-        int statusPermission =ContextCompat.checkSelfPermission(this, ArrayPermission.keyAt(i));
-         ArrayPermission.setValueAt(i,statusPermission) ;
-        }*/
-
-   /*     StatusPermiss("android.permission.READ_EXTERNAL_STORAGE");
-        StatusPermiss("android.permission.WRITE_EXTERNAL_STORAGE");
-        StatusPermiss("android.permission.READ_CONTACTS");*/
-/*
-        if( perm.StatusPermiss(MainActivity.this,"android.permission.READ_EXTERNAL_STORAGE") &
-                perm.StatusPermiss(MainActivity.this,"android.permission.WRITE_EXTERNAL_STORAGE") &
-                perm.StatusPermiss(MainActivity.this,"android.permission.READ_CONTACTS")){
-           // button.setEnabled(true);
-            Toast.makeText(getApplicationContext()," Всё разрешения получены! Можете продолжать работу",Toast.LENGTH_SHORT);
-
-
-
-        }else{
-          //  button.setEnabled(false);
-
-            String[] arr = (String[]) deniedPermission.toArray(new String[deniedPermission.size()]);//
-            Log.d(TAG, "deniedPermissiondeniedPermissiondeniedPermissiondeniedPermissiondeniedPermission"+deniedPermission);
-            Log.d(TAG, "arrarrarrarrarrarrarrarrarrarrarrarrarrarrarrarrarrarrarrarr "+arr);
-            ActivityCompat.requestPermissions(MainActivity.Context(),
-                     arr, PERMISSION_REQUEST_CODE); // не уверен что будет работать
-            deniedPermission.clear();// что бы не переполнялся одинаковыми значениями
-
-        }*/
-
+        cr=getContentResolver();
+        soundPlayback=new SoundPlayback();
 
        MainActivity.super.StatusPermiss(this,MassPermisiion);
 
+        soundPlayback.createNewSoundPool();
+        soundIdactivation=soundPlayback.loadSound("activation.mp3",mAssetManager);
+        soundIdreadiness= soundPlayback.loadSound("readiness.wav",mAssetManager);
 
 
 
+        CheckBox sounCheckBox = (CheckBox) findViewById(R.id.sounCheckBox);
+
+        sounCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    MainActivity.soundOn=true;
+                    soundPlayback.playSound(soundIdactivation);
+                }
+                else {
+                    MainActivity.soundOn=false;
+
+                }
+            }
+        });
 
         toggle = (ToggleButton)findViewById(R.id.speechToggle);
         toggleListener = new CompoundButton.OnCheckedChangeListener() {
@@ -158,138 +182,41 @@ public class MainActivity extends Permission {
             public void onCheckedChanged(CompoundButton view, boolean isChecked) {
                 if(isChecked){
                     //     button.setEnabled(true);
-                    MainActivity.PersonMessage = mess.isGiveMessage(cr);
+                    ((TextView) findViewById(R.id.caption_text)).setText(R.string.preparation_bot);
+
+                    PersonMessage = mess.isGiveMessage(cr);
+
+                    String nameMessage=isCreateStringContacts(cr,mess);
+                    MESSAGE_SEARCH=nameMessage.substring(0,nameMessage.length()-2);
+
                     Log.d(TAG, "111111111111111111111111111111111"+PersonMessage);
-                    // entryFile.RewriteDictionary(cr);
-                    PatchFile(cr,entryFile.CombineContactString(cr),nameFileDict);
 
-                    PatchFile(cr,textFilegram+isCreateStringContacts(cr,mess),nameFileGram);
+                    PatchFile(entryFile.CombineContactString(cr),nameFileDict);
+                    PatchFile(textFilegram+isCreateStringContacts(cr,mess),nameFileGram);
 
-                    //entryFile.CombineContactString(cr);
+                    checkTTS();
+                    runRecognizerSetup();
+                    initializeSMSReceiver();
+                    registerSMSReceiver();
 
-                    //toggle.setEnabled(false);
 
-
-                    //  entryFile.ReadLastLine(CombineContactString(cr),nameFileDict);
                 }else{
-
+                    ((TextView) findViewById(R.id.caption_text)).setText(R.string.stop_bot);
+                    unregisterReceiver(smsReceiver);
+                    recognizer.cancel();
+                    recognizer.shutdown();
                     /** Останавливай ТТС И бота*/
                 }
             }
         };
 
+        toggle.setOnCheckedChangeListener(toggleListener);
     }
 
 
-
-
-/*
-
-
-    public boolean StatusPermiss (String NamePermission){
-        */
-/* проверяю статус разрешения и записываею его в значение ArrayMap, ключом является название разрешения *//*
-
-            int statusPermission =ContextCompat.checkSelfPermission(this, NamePermission);
-         //   ArrayPermission.indexOfKey(NamePermission) ;
-        //    ArrayPermission.setValueAt(ArrayPermission.indexOfKey(NamePermission), statusPermission);
-        Log.d(TAG, "StatusPermissStatusPermissStatusPermissStatusPermissStatusPermissStatusPermiss "+ NamePermission + " STATUS " +statusPermission);
-       // ArrayPermission.get(NamePermission)==PackageManager.PERMISSION_GRANTED;
-        //записываю имена на которым не даны разрешения
-        if(statusPermission!=PackageManager.PERMISSION_GRANTED){
-            deniedPermission.add(NamePermission);
-
-            Log.d(TAG, "StatusPermissStatusPermissdeniedPermissiondeniedPermissiondenied "+deniedPermission);
-            return false;
-        }
-        boolean st=statusPermission==PackageManager.PERMISSION_GRANTED;
-        Log.d(TAG, "StatusPermissSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSsS "+ st);
-
-        return true;
-
-    }
-
-
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
-
-        switch (requestCode){
-            case PERMISSION_REQUEST_CODE:{
-                Log.d(TAG, "PermissionPermissionnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn          11111111111111  " +permissions);
-                for(int i=0;grantResults.length>0 && i<grantResults.length;i++ ){
-                    Log.d(TAG, "PermissionPermissionnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn          2222222222222222222");
-                    if(grantResults[i] != PackageManager.PERMISSION_GRANTED){
-                        deniedPermission.add(permissions[i]);
-                        Log.d(TAG, "PermissionPermissionnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"+permissions[i]);
-                    }
-                }
-               // break;
-            }
-            default:{
-                Toast.makeText(this,"ОШИБКА ! requestCode и PERMISSION_REQUEST_CODE не совпадают.",
-                                Toast.LENGTH_SHORT).show();
-                break;
-            }
-
-        }
-
-        if(deniedPermission.size()>0 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)*/
-/*Возможно длинна эрэй листа работает некорректно *//*
-{
-
-            showNoStoragePermissionSnackbar();
-
-        }else {
-          Toast.makeText(this,"onRequestPermissionsResult Всё норм работяги, проверка",Toast.LENGTH_SHORT).show();
-//разрешения получены ,можно продолжать работу
-        }
-    }
-
-
-
-    public void showNoStoragePermissionSnackbar() {
-        Snackbar.make(MainActivity.this.findViewById(R.id.activity_view), "Не хватает разрешений" , Snackbar.LENGTH_INDEFINITE)
-                .setAction("Настройки", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        openApplicationSettings();
-
-                        Toast.makeText(getApplicationContext(),
-                                "Пожалуйста, дайте все необходимые разрешения :"+deniedPermission, */
-/* вставитть массив с имена разрешений, которым нужен доступ*//*
-
-                                Toast.LENGTH_SHORT);
-                    }
-                })
-                .show();
-    }
-
-    public void openApplicationSettings() {
-        Intent appSettingsIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                Uri.parse("package:" + getPackageName()));
-        startActivityForResult(appSettingsIntent, PERMISSION_REQUEST_CODE);
-    }
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-          //  makeFolder();
-            Toast.makeText(this,"onActivityResult все норм короче ,работяги",Toast.LENGTH_SHORT).show();
-            return;
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
-*/
-
-
-
-    public void PatchFile(ContentResolver cr,String textForEntry, String nameFile){
+    public void PatchFile(String textForEntry, String nameFile){
 
         EntryFile entryfile=new EntryFile();
-      //  String MessagePerson=isCreateStringContacts(cr,message);
 
         try {
             Assets assets = new Assets(MainActivity.this);
@@ -310,26 +237,180 @@ public class MainActivity extends Permission {
 
         for (String key : PersonMessage.keySet()) {
             if(key.matches("^[а-яё\" \"]+$")){
-                MessageKey=MessageKey + " | "+ key ;
+                MessageKey+= " | "+key;
 
             }
-            Log.d(TAG,"000000000000000000000000000000000000000000000000000000000000000000000000000000000000  "+PersonMessage);
         }
-        //   Log.d(TAG,"000000000000000000000000000000000000000000000000000000000000000000000000000000000000  "+MessageKey);
 
         MessageKey=MessageKey.substring(3);
-        Log.d(TAG,"111111111111111111111111111111111111111111111111111111111111111111111111111  "+MessageKey);
-        MessageKey= MessageKey +"; ";
-
+        MessageKey+= " ;";
         return MessageKey;
     }
 
 
 
 
+    private void runRecognizerSetup() {
+
+        new AsyncTask<Void, Void, Exception>() {
+            @Override
+            protected Exception doInBackground(Void... params) {
+                try {
+                    Assets assets = new Assets(MainActivity.this);
+                    File assetDir = assets.syncAssets();
+                    setupRecognizer(assetDir);
+
+                    recognizer.startListening(KWS_SEARCH);
+                    soundPlayback.playSound(soundIdreadiness);
+                } catch (IOException e) {
+                    return e;
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Exception result) {
+                if (result != null) {
+                    ((TextView) findViewById(R.id.caption_text))
+                            .setText(R.string.speach_not_found +" "+ result);
+                    System.out.println(result.getMessage());
+                } else {
+                    switchSearch(KWS_SEARCH);
+                }
+            }
+        }.execute();
+    }
 
 
-/*
+    private void setupRecognizer(File assetsDir) throws IOException {
+        recognizer = SpeechRecognizerSetup.defaultSetup()
+                .setAcousticModel(new File(assetsDir, "ru-rus-ptm"))
+                .setDictionary(new File(assetsDir, "ru-ru.dict"))
+
+                /** .setRawLogDir(assetsDir) отключаем эту строку, если хотим чтобы прога сохраняла
+                                            raw файлы в хранилизе приложения*/
+                .setRawLogDir(assetsDir).setKeywordThreshold(1e-20f)/** Чувствительность слушателя*/
+                .setFloat("-beam", 1e-30f)
+                .getRecognizer();
+
+
+
+        recognizer.addListener(this);
+
+
+        // Create keyword-activation search.
+        recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
+
+        // Create your custom grammar-based search
+        File menuGrammar = new File(assetsDir, "menu.gram");
+        recognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);
+
+        // Create language model search
+        File languageModel = new File(assetsDir, "weather.dmp");
+        recognizer.addNgramSearch(FORECAST_SEARCH, languageModel);
+    }
+
+
+
+    @Override
+    public void onStop(){
+        super.onStop();
+
+        if(recognizer!=null){
+            recognizer.cancel();
+            recognizer.shutdown();
+        }
+    }
+
+    @Override
+    public void onPartialResult(Hypothesis hypothesis){
+
+        String bodyMessage;
+
+        if(hypothesis==null){ return;}
+
+        String text=hypothesis.getHypstr();
+
+            switch (text){
+                case KEYPHRASE:{
+                    switchSearch(MENU_SEARCH);
+                    soundPlayback.playSound(soundIdactivation);
+
+                    break;
+                }
+
+                case FORECAST_SEARCH:{
+                    speaker.speak(smsReceiver.getResultData());
+                    switchSearch(FORECAST_SEARCH);
+                    break;
+                }
+
+                default:{
+                    if(PersonMessage.containsKey(text)){
+                        /** проверить на корректность */
+                        bodyMessage=mess.MessageOutput(text,cr);
+                        SpeachMessage(bodyMessage);
+                        switchSearch(FORECAST_SEARCH);
+                    }else {
+                        System.out.println("Гипотеза "+ hypothesis.getHypstr());
+                    }
+                    break;
+                }
+
+            }
+
+
+    }
+
+    public void SpeachMessage(String bodyMessage){
+        System.out.println("SpeachMessage "+bodyMessage);
+        if(bodyMessage==null){
+            speaker.speak(getString(R.string.message_not_found));
+        }else{
+            speaker.speak(bodyMessage);
+        }
+    }
+
+    @Override
+    public void onResult(Hypothesis hypothesis){
+        if(hypothesis!=null){
+            System.out.println(" Распознал "+hypothesis.getHypstr());
+        }
+    }
+
+    @Override
+    public void onBeginningOfSpeech ( ) {
+    }
+
+    @Override
+    public void onEndOfSpeech() {
+        if (!recognizer.getSearchName().equals(KWS_SEARCH))
+            switchSearch(KWS_SEARCH);
+    }
+
+    private void switchSearch(String searchName) {
+        recognizer.stop();
+
+        if (searchName.equals(KWS_SEARCH))
+            recognizer.startListening(searchName);
+        else
+            recognizer.startListening(searchName, 10000);
+
+        String caption = getResources().getString(captions.get(searchName));
+        ((TextView) findViewById(R.id.caption_text)).setText(caption);
+    }
+
+
+    @Override
+    public void onError(Exception error) {
+        ((TextView) findViewById(R.id.caption_text)).setText(error.getMessage());
+        System.out.println(error.getMessage());
+    }
+
+    @Override
+    public void onTimeout() {
+        switchSearch(KWS_SEARCH);
+    }
 
 
     private void initializeSMSReceiver(){
@@ -366,6 +447,11 @@ public class MainActivity extends Permission {
         startActivityForResult(check, CHECK_CODE);
     }
 
+    private void registerSMSReceiver() {
+        IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
+        registerReceiver(smsReceiver, intentFilter);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == CHECK_CODE){
@@ -377,59 +463,6 @@ public class MainActivity extends Permission {
                 startActivity(install);
             }
         }
-    }
-
-
-    private void registerSMSReceiver() {
-        IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
-        registerReceiver(smsReceiver, intentFilter);
-    }
-
-    public void PatchFile(ContentResolver cr,Message message){
-
-        EntryFile entryfile=new EntryFile();
-        String MessagePerson=isCreateStringContacts(cr,message);
-
-        try {
-            Assets assets = new Assets(PocketSphinxActivity.this);
-            File assetDir = assets.syncAssets();
-            entryfile.ReadLastLine(assetDir,MessagePerson);
-
-        } catch (IOException e) {
-
-        }
-    }
-
-
-    public void runRecognizerSetup() {
-        new AsyncTask<Void, Void, Exception>() {
-            @Override
-            protected Exception doInBackground(Void... params) {
-                try {
-                    Assets assets = new Assets(PocketSphinxActivity.this);
-                    File assetDir = assets.syncAssets();
-                    setupRecognizer(assetDir);
-                    recognizer.startListening(KWS_SEARCH);
-
-                    soundPlayback.playSound(soundIdreadiness);
-
-                } catch (IOException e) {
-                    return e;
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Exception result) {
-                if (result != null) {
-                    ((TextView) findViewById(R.id.caption_text))
-                            .setText(R.string.speach_not_found +" "+ result);
-                } else {
-                    switchSearch(KWS_SEARCH);
-
-                }
-            }
-        }.execute();
     }
 
     @Override
@@ -447,158 +480,9 @@ public class MainActivity extends Permission {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        if (recognizer != null) {
-            recognizer.cancel();
-            recognizer.shutdown();
-        }
-
-        if(smsReceiver!=null){
-            unregisterReceiver(smsReceiver);
-        }
-        if(speaker!=null){
-            speaker.destroy();
-        }
-        soundPool.release();
-        soundPool = null;
-    }
-*/
-
-    /**
-     * In partial result we get quick updates about current hypothesis. In
-     * keyword spotting mode we can react here, in other modes we need to wait
-     * for final result in onResult.
-     */
- /*   @Override
-    public void onPartialResult(Hypothesis hypothesis) {
-        Message mess= new Message();
-        ContentResolver cr =getContentResolver();
-        String bodyMessage;
-
-        if (hypothesis == null)
-            return;
-
-        String text = hypothesis.getHypstr();
-
-        if (text.equals(KEYPHRASE)){
-            switchSearch(MENU_SEARCH);
-            soundPlayback.playSound(soundIdactivation);
-            //  soundPlayback.playSound(soundIdreadiness);
-        }
-
-        else if (text.equals(FORECAST_SEARCH)){
-            speaker.speak(smsReceiver.getResultData());
-            switchSearch(FORECAST_SEARCH);
-        }
-
-        else if (PersonMessage.containsKey(text)){
-            *//** проверить на корректность *//*
-            bodyMessage=mess.MessageOutput(text,cr);
-            SpeachMessage(bodyMessage);
-            switchSearch(FORECAST_SEARCH);
-        }
-        else{
-            //((TextView) findViewById(R.id.result_text)).setText(text);
-        }
-    }
-
-    public void SpeachMessage(String bodyMessage){
-        if(bodyMessage==null){
-            speaker.speak(getString(R.string.message_not_found));
-        }else{
-            speaker.speak(bodyMessage);
-        }
-    }
-*/
-    /**
-     * This callback is called when we stop the recognizer.
-     */
-/*    @Override
-    public void onResult(Hypothesis hypothesis) {*/
-        /** getContentResolver() в будущем надо убрать
-         он нужен для Context Который не передаётся из класса Message*/
-
-        //((TextView) findViewById(R.id.result_text)).setText("");
-     //   if (hypothesis != null) {
-         //   String text = hypothesis.getHypstr();
-
-            // makeText(this, text, Toast.LENGTH_SHORT).show(); /** выводит результат распознавание в тостах */
-     //   }
-  //  }
-
-  /*  @Override
-    public void onBeginningOfSpeech() {
-    }*/
-
-    /**
-     * We stop recognizer here to get a final result
-     */
-/*
-    @Override
-    public void onEndOfSpeech() {
-        if (!recognizer.getSearchName().equals(KWS_SEARCH))
-            switchSearch(KWS_SEARCH);
-    }
-
-    private void switchSearch(String searchName) {
-        recognizer.stop();
-
-        // If we are not spotting, start listening with timeout (10000 ms or 10 seconds).
-        if (searchName.equals(KWS_SEARCH))
-            recognizer.startListening(searchName);
-        else
-            recognizer.startListening(searchName, 10000);
-
-        String caption = getResources().getString(captions.get(searchName));
-        ((TextView) findViewById(R.id.caption_text)).setText(caption);
-    }
-
-    private void setupRecognizer(File assetsDir) throws IOException {
-
-        recognizer = SpeechRecognizerSetup.defaultSetup()
-                .setAcousticModel(new File(assetsDir, "ru-rus-ptm"))
-                .setDictionary(new File(assetsDir, "ru-ru.dict"))
-                .setRawLogDir(assetsDir) // To disable logging of raw audio comment out this call (takes a lot of space on the device)
-
-                .setRawLogDir(assetsDir).setKeywordThreshold(1e-20f)
-                .setFloat("-beam", 1e-30f)
-
-                .getRecognizer();
-        recognizer.addListener(this);
-*/
-
-        /** In your application you might not need to add all those searches.
-         * They are added here for demonstration. You can leave just one.
-         */
-/*
-
-        // Create keyword-activation search.
-        recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
-
-        // Create grammar-based search for selection between demos
-        File menuGrammar = new File(assetsDir, "menu.gram");
-        recognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);
-
-        // Create language model search
-        File languageModel = new File(assetsDir, "weather.dmp");
-        recognizer.addNgramSearch(FORECAST_SEARCH, languageModel);
+    public void onPointerCaptureChanged(boolean hasCapture) {
 
     }
-
-    @Override
-    public void onError(Exception error) {
-        ((TextView) findViewById(R.id.caption_text)).setText(error.getMessage());
-    }
-
-    @Override
-    public void onTimeout() {
-        switchSearch(KWS_SEARCH);
-    }
-*/
-
-
 
 
 }
